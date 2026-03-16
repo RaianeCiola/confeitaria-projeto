@@ -1,0 +1,97 @@
+import 'package:flutter/material.dart';
+import '../service/confeitaria_service.dart';
+
+class AdicionarProduto extends StatefulWidget {
+  @override
+  _AdicionarProdutoState createState() => _AdicionarProdutoState();
+}
+
+class _AdicionarProdutoState extends State<AdicionarProduto> {
+  final _formKey = GlobalKey<FormState>();
+  final _nomeController = TextEditingController();
+  final _descricaoController = TextEditingController();
+  final _precoController = TextEditingController();
+  final _categoriaController = TextEditingController();
+
+//nessa parte define como disponivel o poroduto ja que o usario está adcionando
+// logo supoe-se que esta disponivel 
+  void _adicionarProduto() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        await ApiService.adicionarProduto(
+          _nomeController.text,
+          _descricaoController.text,
+          double.parse(_precoController.text),
+          _categoriaController.text,
+          "Disponivel", 
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Produto adicionado com sucesso!")),
+        );
+        Navigator.pop(context); // Volta para a tela anterior
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Erro: $e")),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Adicionar Produto"),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _nomeController,
+                decoration: InputDecoration(labelText: "Nome"),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Por favor, insira o nome.";
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _descricaoController,
+                decoration: InputDecoration(labelText: "Descrição"),
+              ),
+              TextFormField(
+                controller: _precoController,
+                decoration: InputDecoration(labelText: "Preço"),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Por favor, insira o preço.";
+                  }
+                  if (double.tryParse(value) == null) {
+                    return "Por favor, insira um número válido.";
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _categoriaController,
+                decoration: InputDecoration(labelText: "Categoria"),
+              ),
+              
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _adicionarProduto,
+                child: Text("Salvar"),
+              ),
+              
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
